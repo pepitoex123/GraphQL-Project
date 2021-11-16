@@ -29,7 +29,7 @@ const resolvers = {
             return 3.14
         },
         releaseYear() {
-            return 2014
+            return 2008
         },
         rating() {
             return null
