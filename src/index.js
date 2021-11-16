@@ -10,11 +10,22 @@ import { GraphQLServer } from "graphql-yoga";
 
 const typeDefs = `
     type Query {
+        me: User!
+        post: Post!
+    }
+    
+    type User {
+        id: ID!
+        name: String!
+        email: String!
+        age: Int
+    }
+    
+    type Post {
+        id: String!
         title: String!
-        price: Float!
-        releaseYear: Int
-        rating: Float
-        inStock: Boolean!
+        body: String!
+        published: Boolean!
     }
 `
 
@@ -22,20 +33,21 @@ const typeDefs = `
 
 const resolvers = {
     Query: {
-        title() {
-            return "Product 1"
+        me() {
+            return {
+                id: "123098",
+                name: "Pep",
+                email: "mike@example.com",
+                age: 32
+            }
         },
-        price() {
-            return 3.14
-        },
-        releaseYear() {
-            return 2008
-        },
-        rating() {
-            return null
-        },
-        inStock() {
-            return true
+        post() {
+            return {
+                id: "121311a",
+                title: "How to improve your cooking skills",
+                body: "Bla bla bla",
+                published: true
+            }
         }
     }
 }
