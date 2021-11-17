@@ -20,6 +20,28 @@ const users = [{
     email: "Sarah@example.com"
 }]
 
+
+const posts = [{
+    id: "10",
+    title: "GraphQL 101",
+    body: "This is how to use GraphQL...",
+    published: true,
+    author: "1"
+},{
+    id: "11",
+    title: "GraphQL 201",
+    body: "This is an advanced GraphQL course",
+    published: false,
+    author: "2"
+},{
+    id: "12",
+    title: "GraphQL 301",
+    body: "This is a super advanced GraphQL course",
+    published: false,
+    author: "1"
+},
+]
+
 // Type Definitions (application schema)
 
 const typeDefs = `
@@ -27,6 +49,7 @@ const typeDefs = `
         users(query: String): [User!]!
         me: User!
         post: Post!
+        posts(query: String): [Post!]!
     }
     
     type User {
@@ -41,6 +64,7 @@ const typeDefs = `
         title: String!
         body: String!
         published: Boolean!
+        author: User!
     }
 `
 
@@ -55,6 +79,14 @@ const resolvers = {
 
             return users.filter((user) => {
                 return user.name.toLowerCase().includes(args.query.toLowerCase());
+            })
+        },
+        posts(parent,args,ctx,info){
+            if(!args.query){
+                return posts
+            }
+            return posts.filter((post) => {
+                return post.title.toLowerCase().includes(args.query.toLowerCase());
             })
         },
         me() {
@@ -72,6 +104,11 @@ const resolvers = {
                 body: "Bla bla bla",
                 published: true
             }
+        }
+    },
+    Post: {
+        author(parent,args,ctx,info) {
+            return users.find((user) => user.id === parent.author)
         }
     }
 }
