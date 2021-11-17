@@ -8,19 +8,23 @@ import { GraphQLServer } from "graphql-yoga";
 const comments = [{
     id: "560",
     text: "Hello World!",
-    author: "100"
+    author: "100",
+    post: "10"
 }, {
     id: "640",
     text: "Wow this course is amazing :D",
-    author: "400"
+    author: "400",
+    post: "11"
 },{
     id: "520",
     text: "I did not like this course that much :(",
-    author: "300"
+    author: "300",
+    post: "12"
 },{
     id: "560",
     text: "I would totally recommend this course!",
-    author: "400"
+    author: "400",
+    post: "10"
 }]
 
 const users = [{
@@ -86,12 +90,14 @@ const typeDefs = `
         body: String!
         published: Boolean!
         author: User!
+        comments: [Comment!]!
     }
     
     type Comment {
         id: String!
         text: String!
         author: User!
+        post: Post!
     }
 `
 
@@ -124,14 +130,6 @@ const resolvers = {
                 age: 32
             }
         },
-        post() {
-            return {
-                id: "121311a",
-                title: "How to improve your cooking skills",
-                body: "Bla bla bla",
-                published: true
-            }
-        },
         comments(parent,args,ctx,info){
             return comments
         }
@@ -139,6 +137,9 @@ const resolvers = {
     Post: {
         author(parent,args,ctx,info) {
             return users.find((user) => user.id === parent.author)
+        },
+        comments(parent,args,ctx,info){
+            return comments.filter((comment) => comment.post === parent.id)
         }
     },
     User: {
@@ -152,6 +153,9 @@ const resolvers = {
     Comment: {
         author(parent,args,ctx,info){
             return users.find((user) => Number(user.id) === Number(parent.author))
+        },
+        post(parent,args,ctx,info){
+            return posts.find((post) => Number(post.id) === Number(parent.post))
         }
     }
 }
