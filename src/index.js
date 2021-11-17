@@ -6,16 +6,16 @@ import { GraphQLServer } from "graphql-yoga";
 // Demo user data
 
 const users = [{
-    id: "1",
+    id: "100",
     name: "Uriel",
     email: "Uriel@example.com",
     age: 4000
 },{
-    id: "2",
+    id: "400",
     name: "Monica",
     email: "Monica@example.com"
 },{
-    id: "3",
+    id: "300",
     name: "Sarah",
     email: "Sarah@example.com"
 }]
@@ -26,19 +26,19 @@ const posts = [{
     title: "GraphQL 101",
     body: "This is how to use GraphQL...",
     published: true,
-    author: "1"
+    author: "100"
 },{
     id: "11",
     title: "GraphQL 201",
     body: "This is an advanced GraphQL course",
     published: false,
-    author: "2"
+    author: "100"
 },{
     id: "12",
     title: "GraphQL 301",
     body: "This is a super advanced GraphQL course",
     published: false,
-    author: "1"
+    author: "300"
 },
 ]
 
@@ -57,6 +57,7 @@ const typeDefs = `
         name: String!
         email: String!
         age: Int
+        posts: [Post!]!
     }
     
     type Post {
@@ -109,6 +110,11 @@ const resolvers = {
     Post: {
         author(parent,args,ctx,info) {
             return users.find((user) => user.id === parent.author)
+        }
+    },
+    User: {
+        posts(parent,args,ctx,info){
+            return posts.filter((post) => Number(post.author) === Number(parent.id))
         }
     }
 }
