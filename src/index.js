@@ -7,16 +7,20 @@ import { GraphQLServer } from "graphql-yoga";
 
 const comments = [{
     id: "560",
-    text: "Hello World!"
+    text: "Hello World!",
+    author: "100"
 }, {
     id: "640",
-    text: "Wow this course is amazing :D"
+    text: "Wow this course is amazing :D",
+    author: "400"
 },{
     id: "520",
-    text: "I did not like this course that much :("
+    text: "I did not like this course that much :(",
+    author: "300"
 },{
     id: "560",
-    text: "I would totally recommend this course!"
+    text: "I would totally recommend this course!",
+    author: "400"
 }]
 
 const users = [{
@@ -73,6 +77,7 @@ const typeDefs = `
         email: String!
         age: Int
         posts: [Post!]!
+        comments: [Comment!]!
     }
     
     type Post {
@@ -86,6 +91,7 @@ const typeDefs = `
     type Comment {
         id: String!
         text: String!
+        author: User!
     }
 `
 
@@ -138,6 +144,14 @@ const resolvers = {
     User: {
         posts(parent,args,ctx,info){
             return posts.filter((post) => Number(post.author) === Number(parent.id))
+        },
+        comments(parent,args,ctx,info){
+            return comments.filter((comment) => Number(comment.author) === Number(parent.id))
+        }
+    },
+    Comment: {
+        author(parent,args,ctx,info){
+            return users.find((user) => Number(user.id) === Number(parent.author))
         }
     }
 }
