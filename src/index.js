@@ -5,6 +5,20 @@ import { GraphQLServer } from "graphql-yoga";
 
 // Demo user data
 
+const comments = [{
+    id: "560",
+    text: "Hello World!"
+}, {
+    id: "640",
+    text: "Wow this course is amazing :D"
+},{
+    id: "520",
+    text: "I did not like this course that much :("
+},{
+    id: "560",
+    text: "I would totally recommend this course!"
+}]
+
 const users = [{
     id: "100",
     name: "Uriel",
@@ -50,6 +64,7 @@ const typeDefs = `
         me: User!
         post: Post!
         posts(query: String): [Post!]!
+        comments: [Comment!]!
     }
     
     type User {
@@ -66,6 +81,11 @@ const typeDefs = `
         body: String!
         published: Boolean!
         author: User!
+    }
+    
+    type Comment {
+        id: String!
+        text: String!
     }
 `
 
@@ -105,6 +125,9 @@ const resolvers = {
                 body: "Bla bla bla",
                 published: true
             }
+        },
+        comments(parent,args,ctx,info){
+            return comments
         }
     },
     Post: {
