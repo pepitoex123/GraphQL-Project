@@ -81,6 +81,7 @@ const typeDefs = `
         createPost(data: CreatePostInput!): Post!
         createComment(data: CreateCommentInput!): Comment!
         deleteUser(id: ID!): User!
+        deletePost(id: ID!): Post!
     }
     
     
@@ -218,6 +219,15 @@ const resolvers = {
             posts.push(post)
 
             return post
+        },
+        deletePost(parent,args,ctx,info){
+            let postIndex = posts.findIndex((post) => post.id === args.id);
+            if(!postIndex){
+                throw new Error(`The post with id ${args.id} does not exist`);
+            }
+            let deletedPost = posts.splice(postIndex,1);
+            comments = comments.filter((comment) => comment.post !== args.id);
+            return deletedPost[0];
         },
         createComment(parent,args,ctx,info){
             const isUser = users.some((user) => Number(user.id) === Number(args.data.author));
