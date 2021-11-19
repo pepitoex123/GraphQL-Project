@@ -1,164 +1,22 @@
 import { GraphQLServer } from "graphql-yoga";
-import uuidv4 from "uuid/v4";
 import db from "./db";
+import Query from "./resolvers/Query";
+import Mutation from "./resolvers/Mutation";
+import Post from "./resolvers/Post";
+import User from "./resolvers/User";
+import Comment from "./resolvers/Comment";
 
-
-
-
-// Resolvers
-
-const resolvers = {
-    Query: {
-        users(parent,args,{db},info){
-            if(!args.query){
-                return db.users
-            }
-
-            return db.users.filter((user) => {
-                return user.name.toLowerCase().includes(args.query.toLowerCase());
-            })
-        },
-        posts(parent,args,{db},info){
-            if(!args.query){
-                return db.posts
-            }
-            return db.posts.filter((post) => {
-                return post.title.toLowerCase().includes(args.query.toLowerCase());
-            })
-        },
-        me() {
-            return {
-                id: "123098",
-                name: "Pep",
-                email: "mike@example.com",
-                age: 32
-            }
-        },
-        comments(parent,args, {db},info){
-            return db.comments
-        }
-    },
-    Mutation: {
-        createUser(parent,args,{db},info) {
-            const emailTaken = db.users.some((user) => user.email === args.data.email)
-            if(emailTaken){
-                throw new Error(`The email ${args.email} has already been taken`)
-            }
-            const user = {
-                id: uuidv4(),
-                ...args.data
-            }
-
-            db.users.push(user)
-
-            return user
-        },
-        deleteUser(parent,args,{db},info){
-            const userIndex = db.users.findIndex((user) => {
-                return user.id === args.id
-            })
-            if(userIndex === -1){
-                throw new Error("User not found");
-            }
-
-            const deletedUsers = db.users.splice(userIndex,1);
-
-            db.posts = db.posts.filter((post) => {
-                const match = post.author === args.id
-                if(match){
-                    db.comments = db.comments.filter((comment) => {
-                        return comment.post !== post.id
-                    })
-                }
-                return !match
-            })
-
-            db.comments = db.comments.filter((comment) => comment.author !== args.id)
-
-
-            return deletedUsers[0]
-        },
-        createPost(parent,args, {db},info){
-            const userExists = db.users.some((user) => Number(user.id) === Number(args.data.author))
-
-            if(!userExists){
-                throw new Error(`User not found`)
-            }
-
-            const post = {
-                id: uuidv4(),
-                ...args.data
-            }
-
-            db.posts.push(post)
-
-            return post
-        },
-        deletePost(parent,args,{db},info){
-            let postIndex = db.posts.findIndex((post) => post.id === args.id);
-            if(!postIndex){
-                throw new Error(`The post with id ${args.id} does not exist`);
-            }
-            let deletedPost = db.posts.splice(postIndex,1);
-            db.comments = db.comments.filter((comment) => comment.post !== args.id);
-            return deletedPost[0];
-        },
-        createComment(parent,args,{db},info){
-            const isUser = db.users.some((user) => Number(user.id) === Number(args.data.author));
-            const isPost = db.users.some((user) => Number(user.id) === Number(args.data.post));
-
-            if(!(isUser) || !(isPost)){
-                throw new Error("post or/and user not found")
-            }
-
-            const comment = {
-                id: uuidv4(),
-                ...args.data
-            }
-
-            db.comments.push(comment)
-
-            return comment;
-        },
-        deleteComment(parent,args,{db},info){
-            let commentIndex = db.comments.findIndex((comment) => comment.id === args.id);
-            if(!commentIndex){
-                throw new Error(`The comment with id ${args.id} does not exist`);
-            }
-            let deletedComment = db.comments.splice(commentIndex,1);
-            return deletedComment[0];
-        }
-    },
-    Post: {
-        author(parent,args,{db},info) {
-            return db.users.find((user) => user.id === parent.author)
-        },
-        comments(parent,args,{db},info){
-            return db.comments.filter((comment) => comment.post === parent.id)
-        }
-    },
-    User: {
-        posts(parent,args, {db},info){
-            return db.posts.filter((post) => Number(post.author) === Number(parent.id))
-        },
-        comments(parent,args, {db},info){
-            return db.comments.filter((comment) => Number(comment.author) === Number(parent.id))
-        }
-    },
-    Comment: {
-        author(parent,args,{db},info){
-            return db.users.find((user) => Number(user.id) === Number(parent.author))
-        },
-        post(parent,args,{db},info){
-            return db.posts.find((post) => Number(post.id) === Number(parent.post))
-        }
-    }
-}
 
 
 const server = new GraphQLServer({
     typeDefs: "./src/schema.graphql",
-    resolvers,
+    resolvers: {
+        Query,
+        Mutation,
+        Post,
+        User,
+        Comment
+    },
     context: {
         db
     }
