@@ -82,6 +82,7 @@ const typeDefs = `
         createComment(data: CreateCommentInput!): Comment!
         deleteUser(id: ID!): User!
         deletePost(id: ID!): Post!
+        deleteComment(id: ID!): Comment!
     }
     
     
@@ -245,6 +246,14 @@ const resolvers = {
             comments.push(comment)
 
             return comment;
+        },
+        deleteComment(parent,args,ctx,info){
+            let commentIndex = comments.findIndex((comment) => comment.id === args.id);
+            if(!commentIndex){
+                throw new Error(`The comment with id ${args.id} does not exist`);
+            }
+            let deletedComment = comments.splice(commentIndex,1);
+            return deletedComment;
         }
     },
     Post: {
