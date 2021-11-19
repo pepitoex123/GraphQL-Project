@@ -6,7 +6,7 @@ import uuidv4 from "uuid/v4";
 
 // Demo user data
 
-const comments = [{
+let comments = [{
     id: "560",
     text: "Hello World!",
     author: "100",
@@ -28,7 +28,7 @@ const comments = [{
     post: "10"
 }]
 
-const users = [{
+let users = [{
     id: "100",
     name: "Uriel",
     email: "Uriel@example.com",
@@ -44,7 +44,7 @@ const users = [{
 }]
 
 
-const posts = [{
+let posts = [{
     id: "10",
     title: "GraphQL 101",
     body: "This is how to use GraphQL...",
@@ -77,9 +77,10 @@ const typeDefs = `
     }
     
     type Mutation {
-        createUser(data: CreateUserInput): User!
-        createPost(data: CreatePostInput): Post!
-        createComment(data: CreateCommentInput): Comment!
+        createUser(data: CreateUserInput!): User!
+        createPost(data: CreatePostInput!): Post!
+        createComment(data: CreateCommentInput!): Comment!
+        deleteUser(id: ID!): User!
     }
     
     
@@ -176,6 +177,31 @@ const resolvers = {
             users.push(user)
 
             return user
+        },
+        deleteUser(parent,args,ctx,info){
+            const userIndex = users.findIndex((user) => {
+                return user.id === args.id
+            })
+            if(userIndex === -1){
+                throw new Error("User not found");
+            }
+
+            const deletedUsers = users.splice(userIndex,1);
+
+            posts = posts.filter((post) => {
+                const match = post.author === args.id
+                if(match){
+                    comments = comments.filter((comment) => {
+                        return comment.post !== post.id
+                    })
+                }
+                return !match
+            })
+
+            comments = comments.filter((comment) => comment.author !== args.id)
+
+
+            return deletedUsers[0]
         },
         createPost(parent,args,ctx,info){
             const userExists = users.some((user) => Number(user.id) === Number(args.data.author))
