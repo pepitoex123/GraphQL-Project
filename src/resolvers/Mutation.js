@@ -103,7 +103,7 @@ const Mutation = {
         }
         return post
     },
-    createComment(parent,args,{db},info){
+    createComment(parent,args,{db,pubsub},info){
         const isUser = db.users.some((user) => Number(user.id) === Number(args.data.author));
         const isPost = db.users.some((user) => Number(user.id) === Number(args.data.post));
 
@@ -117,6 +117,9 @@ const Mutation = {
         }
 
         db.comments.push(comment)
+        pubsub.publish(`comment ${args.data.post}`, {
+            comment
+        })
 
         return comment;
     },
